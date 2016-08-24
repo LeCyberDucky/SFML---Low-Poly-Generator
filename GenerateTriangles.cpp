@@ -30,7 +30,7 @@ void getTriangle(sf::ConvexShape& tempTriangle, int_fast32_t pointNum, sf::Vecto
 
 	tempTriangle.setPoint(pointNum, tempPos); 
 	tempTriangle.setFillColor(sf::Color::Transparent); 
-	tempTriangle.setOutlineThickness(0.5); 
+	tempTriangle.setOutlineThickness(-0.5); 
 	tempTriangle.setOutlineColor(sf::Color::Cyan); 
 } 
 
@@ -90,6 +90,7 @@ void setClosePoints(const std::vector<std::pair<int_fast32_t, sf::ConvexShape>>&
 	}
 }
 
+//Iterate trough the pixels of each triangle. For each triangle, set it's average colour as fillcolour 
 void setAvrgColour(std::vector<std::pair<int_fast32_t, sf::ConvexShape>>& triangles, sf::Sprite& workPic, const sf::Texture background, const sf::Image& originalPic, double oldScale)
 {
 	sf::Vector2f pixel; 
@@ -105,10 +106,6 @@ void setAvrgColour(std::vector<std::pair<int_fast32_t, sf::ConvexShape>>& triang
 
 	for (std::vector<std::pair<int_fast32_t, sf::ConvexShape>>::iterator i = triangles.begin(); i != triangles.end(); ++i)
 	{
-		/*std::vector<int_fast32_t> red;
-		std::vector<int_fast32_t> green;
-		std::vector<int_fast32_t> blue;*/ 
-
 		int_fast32_t red{ 0 }; 
 		int_fast32_t green{ 0 }; 
 		int_fast32_t blue{ 0 }; 
@@ -129,12 +126,10 @@ void setAvrgColour(std::vector<std::pair<int_fast32_t, sf::ConvexShape>>& triang
 			{
 				if (collisionCheck(i->second, pixel))
 				{
-					/*red.push_back(originalPic.getPixel(pixel.x, pixel.y).r);
-					green.push_back(originalPic.getPixel(pixel.x, pixel.y).g);
-					blue.push_back(originalPic.getPixel(pixel.x, pixel.y).b);*/ 
-					red += originalPic.getPixel(pixel.x, pixel.y).r;
-					green += originalPic.getPixel(pixel.x, pixel.y).g;
-					blue += originalPic.getPixel(pixel.x, pixel.y).b;
+					//Pixels minus 1, because they are stored in a vector (so counting starts at 0 instead of 1)
+					red += originalPic.getPixel(pixel.x - 1, pixel.y - 1).r;
+					green += originalPic.getPixel(pixel.x - 1, pixel.y - 1).g;
+					blue += originalPic.getPixel(pixel.x - 1, pixel.y - 1).b;
 					++pixelCount; 
 				}
 				++pixel.x;
@@ -143,10 +138,6 @@ void setAvrgColour(std::vector<std::pair<int_fast32_t, sf::ConvexShape>>& triang
 			pixel.x = minX;
 			--pixel.y;
 		}
-
-		/*int_fast32_t redAvg = static_cast <int_fast32_t>( (std::accumulate(red.begin(), red.end(), 0) / red.size()) );
-		int_fast32_t greenAvg = static_cast <int_fast32_t>( (std::accumulate(green.begin(), green.end(), 0) / green.size()) );
-		int_fast32_t blueAvg = static_cast <int_fast32_t> ((std::accumulate(blue.begin(), blue.end(), 0) / blue.size()) );*/
 
 		int_fast32_t redAvg{ redAvg = red / pixelCount };
 		int_fast32_t greenAvg{ greenAvg = green / pixelCount };

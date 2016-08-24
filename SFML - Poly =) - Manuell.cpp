@@ -34,13 +34,26 @@ int_fast32_t main()
 	ifstream inFile; 
 	inFile.open("Pic Location.txt"); 
 
+	string openLocation; 
 	string saveLocation; 
-	std::getline(inFile, saveLocation);
+	string tempString; 
+	bool firstLine{ true };
+
+	while (std::getline(inFile, tempString)) 
+	{
+		if (firstLine)
+		{
+			openLocation = tempString;
+			firstLine = false;
+		}
+		else
+			saveLocation = tempString; 
+	}
 	
 	sf::Image originalPic; 
 	sf::Texture background; 
 
-	if (!originalPic.loadFromFile(saveLocation))
+	if (!originalPic.loadFromFile(openLocation))
 	{
 		return 1; 
 	}
