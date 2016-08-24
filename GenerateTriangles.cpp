@@ -91,7 +91,7 @@ void setClosePoints(const std::vector<std::pair<int_fast32_t, sf::ConvexShape>>&
 }
 
 //Iterate trough the pixels of each triangle. For each triangle, set it's average colour as fillcolour 
-void setAvrgColour(std::vector<std::pair<int_fast32_t, sf::ConvexShape>>& triangles, sf::Sprite& workPic, const sf::Texture background, const sf::Image& originalPic, double oldScale)
+void setAvrgColour(std::vector<std::pair<int_fast32_t, sf::ConvexShape>>& triangles, sf::Sprite& workPic, const sf::Image& originalPic, double oldScale)
 {
 	sf::Vector2f pixel; 
 
@@ -126,7 +126,7 @@ void setAvrgColour(std::vector<std::pair<int_fast32_t, sf::ConvexShape>>& triang
 			{
 				if (collisionCheck(i->second, pixel))
 				{
-					//Pixels minus 1, because they are stored in a vector (so counting starts at 0 instead of 1)
+					//Pixels minus 1, because they are stored in a vector (so counting starts at 0 instead of 1. Otherwise, we'd get out of range.)
 					red += originalPic.getPixel(pixel.x - 1, pixel.y - 1).r;
 					green += originalPic.getPixel(pixel.x - 1, pixel.y - 1).g;
 					blue += originalPic.getPixel(pixel.x - 1, pixel.y - 1).b;
@@ -150,4 +150,30 @@ void setAvrgColour(std::vector<std::pair<int_fast32_t, sf::ConvexShape>>& triang
 	}
 
 	workPic.setScale(oldScale, oldScale); 
+}
+
+//"Draw the generated triangles onto the original picture" and save this as an image on the harddrive 
+void savePicture(std::vector<std::pair<int_fast32_t, sf::ConvexShape>>& triangles, const sf::Image& originalPic, sf::Sprite& workPic, double oldScale, const std::string saveLocation)
+{
+	sf::RenderTexture savePic;
+	if (!savePic.create(originalPic.getSize().x, originalPic.getSize().y)) { /*Do stuff*/ } 
+
+	double scaleFact{ 1 / oldScale };
+	workPic.scale(scaleFact, scaleFact);
+	savePic.draw(workPic); 
+	workPic.scale(oldScale, oldScale); 
+
+	for (std::vector<std::pair<int_fast32_t, sf::ConvexShape>>::iterator i = triangles.begin(); i != triangles.end(); ++i)
+	{
+		i->second.scale(scaleFact, scaleFact); 
+		savePic.draw(i->second); 
+		i->second.scale(oldScale, oldScale);  
+	}
+
+	savePic.display();
+
+	sf::Image saveImage; 
+	saveImage = savePic.getTexture().copyToImage(); 
+
+	saveImage.saveToFile(saveLocation); 
 }

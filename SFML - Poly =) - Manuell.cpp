@@ -156,7 +156,7 @@ int_fast32_t main()
 
 					if (!avgSet)
 					{
-						setAvrgColour(triangles, workPic, background, originalPic, workPic.getScale().x); 
+						setAvrgColour(triangles, workPic, originalPic, workPic.getScale().x); 
 						avgSet = !avgSet; 
 					}
 
@@ -170,6 +170,11 @@ int_fast32_t main()
 
 						avgSet = !avgSet; 
 					}
+				}
+
+				if (event.key.code == sf::Keyboard::Return) 
+				{
+					savePicture(triangles, originalPic, workPic, workPic.getScale().x, saveLocation); 
 				}
 			}
 
