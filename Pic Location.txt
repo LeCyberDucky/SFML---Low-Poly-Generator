@@ -1,2 +1,4 @@
 C:\Users\Andy\Desktop\Pfirsich.jpg
+
 C:\Users\Andy\Desktop\TestyTesty.jpg
+C:\Users\Andy\Desktop\SFML-Logo.png

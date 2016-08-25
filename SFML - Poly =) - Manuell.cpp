@@ -21,6 +21,39 @@ int_fast32_t main()
 	using std::vector;					using std::pair; 
 	using std::ifstream;				using std::string; 
 
+	ifstream inFile; 
+	inFile.open("Pic Location.txt"); 
+
+	string openLocation; 
+	string saveLocation; 
+	string iconLocation; 
+	string tempString; 
+	int_fast16_t lineCount{ 0 };
+
+	while (std::getline(inFile, tempString)) 
+	{
+		if (lineCount == 0)
+		{
+			openLocation = tempString;
+			++lineCount;
+		}
+
+		else if (lineCount == 1) 
+		{
+			saveLocation = tempString;
+			++lineCount; 
+		}
+		else
+			iconLocation = tempString; 
+	}
+
+	sf::Image icon; 
+
+	if(!icon.loadFromFile(iconLocation)) 
+	{
+		return 1;
+	}
+
 	sf::ContextSettings aaSettings;
 	aaSettings.antialiasingLevel = 16;
 
@@ -29,26 +62,8 @@ int_fast32_t main()
 
 	sf::RenderWindow window(sf::VideoMode(winSizeX, winSizeY), "Poly test", sf::Style::Default, aaSettings);
 
-	window.setFramerateLimit(60); 
-
-	ifstream inFile; 
-	inFile.open("Pic Location.txt"); 
-
-	string openLocation; 
-	string saveLocation; 
-	string tempString; 
-	bool firstLine{ true };
-
-	while (std::getline(inFile, tempString)) 
-	{
-		if (firstLine)
-		{
-			openLocation = tempString;
-			firstLine = false;
-		}
-		else
-			saveLocation = tempString; 
-	}
+	window.setFramerateLimit(60);
+	window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
 	
 	sf::Image originalPic; 
 	sf::Texture background; 
