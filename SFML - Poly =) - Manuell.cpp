@@ -9,8 +9,6 @@
 #include <algorithm> 
 #include <cstdint> 
 #include <fstream> 
-
-//#include "RandPoint.h" 
 #include <string> 
 #include <vector> 
 
@@ -78,10 +76,13 @@ int_fast32_t main()
 		return 1; 
 	}
 
-	double startingScale{ 0.4 };
+	double startingScale;
 
-	if (originalPic.getSize().x < 2000)
-		startingScale = 0.6; 
+	if (originalPic.getSize().x > originalPic.getSize().y)
+		startingScale = 800.0 / originalPic.getSize().x;
+
+	else if (originalPic.getSize().x < originalPic.getSize().y)
+		startingScale = 450.0 / originalPic.getSize().y; 
 
 	sf::Sprite workPic; 
 	workPic.setTexture(background); 
@@ -137,11 +138,25 @@ int_fast32_t main()
 						{
 							setClosePoints(triangles, tempTriangle); 
 
-							//Don't emplace_back if two points are same ( = no triangle) 
+							//Don't emplace_back if two points are same or all points build straight line ( = no triangle) 
 							bool twoPointsSame{ tempTriangle.getPoint(0) == tempTriangle.getPoint(1) ||
 												tempTriangle.getPoint(0) == tempTriangle.getPoint(2) ||
 												tempTriangle.getPoint(1) == tempTriangle.getPoint(2) }; 
-							if (!twoPointsSame) 
+
+							bool straightLine{(( tempTriangle.getTransform().transformPoint(tempTriangle.getPoint(0)).x ==
+											     tempTriangle.getTransform().transformPoint(tempTriangle.getPoint(1)).x ) 
+												&&
+												(tempTriangle.getTransform().transformPoint(tempTriangle.getPoint(1)).x ==
+											     tempTriangle.getTransform().transformPoint(tempTriangle.getPoint(2)).x)) 
+												|| 
+											  (( tempTriangle.getTransform().transformPoint(tempTriangle.getPoint(0)).y ==
+											     tempTriangle.getTransform().transformPoint(tempTriangle.getPoint(1)).y ) 
+												&&
+												(tempTriangle.getTransform().transformPoint(tempTriangle.getPoint(1)).y ==
+											    tempTriangle.getTransform().transformPoint(tempTriangle.getPoint(2)).y)) };
+
+
+							if (!twoPointsSame && !straightLine) 
 								triangles.emplace_back(0, tempTriangle);
 						}
 					}

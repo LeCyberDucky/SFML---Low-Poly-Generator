@@ -106,30 +106,36 @@ void setAvrgColour(std::vector<std::pair<int_fast32_t, sf::ConvexShape>>& triang
 
 	for (std::vector<std::pair<int_fast32_t, sf::ConvexShape>>::iterator i = triangles.begin(); i != triangles.end(); ++i)
 	{
-		int_fast32_t red{ 0 }; 
-		int_fast32_t green{ 0 }; 
-		int_fast32_t blue{ 0 }; 
-		int_fast32_t pixelCount{ 0 }; 
+		int_fast64_t red{ 0 }; 
+		int_fast64_t green{ 0 }; 
+		int_fast64_t blue{ 0 }; 
+		int_fast64_t pixelCount{ 0 }; 
 
-		int_fast32_t maxX = static_cast <int_fast32_t>( (i->second.getGlobalBounds().left + i->second.getGlobalBounds().width) );
+		/*int_fast32_t maxX = static_cast <int_fast32_t>( (i->second.getGlobalBounds().left + i->second.getGlobalBounds().width) );
 		int_fast32_t minX = static_cast <int_fast32_t>(i->second.getGlobalBounds().left);
 
 		int_fast32_t maxY = static_cast <int_fast32_t>( (i->second.getGlobalBounds().top + i->second.getGlobalBounds().height) );
 		int_fast32_t minY = static_cast <int_fast32_t>( i->second.getGlobalBounds().top );
+		*/ 
+
+		double maxX{ 0 }; 
+		double minX{ 0 }; 
+		double maxY{ 0 }; 
+		double minY{ 0 }; 
 
 		pixel.x = minX; 
 		pixel.y = maxY; 
 
-		while (pixel.y >= minY)
+		/*while (pixel.y >= minY)
 		{
 			while (pixel.x <= maxX)
 			{
 				if (collisionCheck(i->second, pixel))
 				{
 					//Pixels minus 1, because they are stored in a vector (so counting starts at 0 instead of 1. Otherwise, we'd get out of range.)
-					red += originalPic.getPixel(pixel.x - 1, pixel.y - 1).r;
-					green += originalPic.getPixel(pixel.x - 1, pixel.y - 1).g;
-					blue += originalPic.getPixel(pixel.x - 1, pixel.y - 1).b;
+					red += originalPic.getPixel(pixel.x - 1, pixel.y).r;
+					green += originalPic.getPixel(pixel.x - 1, pixel.y).g;
+					blue += originalPic.getPixel(pixel.x - 1, pixel.y).b;
 					++pixelCount; 
 				}
 				++pixel.x;
@@ -137,13 +143,212 @@ void setAvrgColour(std::vector<std::pair<int_fast32_t, sf::ConvexShape>>& triang
 
 			pixel.x = minX;
 			--pixel.y;
+		}*/
+
+		//Experimental code to speed up process of iterating trough pixels
+
+		sf::Vector2f highestPoint; 
+		sf::Vector2f lowestPoint; 
+		sf::Vector2f middlePoint; 
+
+		if (i->second.getPoint(0).y < i->second.getPoint(1).y &&
+			i->second.getPoint(0).y < i->second.getPoint(2).y)
+		{
+			highestPoint = i->second.getTransform().transformPoint(i->second.getPoint(0)); 
+
+			if (i->second.getPoint(1).y < i->second.getPoint(2).y) 
+			{
+				middlePoint = i->second.getTransform().transformPoint(i->second.getPoint(1)); 
+				lowestPoint = i->second.getTransform().transformPoint(i->second.getPoint(2)); 
+			}
+
+			else 
+			{
+				middlePoint = i->second.getTransform().transformPoint(i->second.getPoint(2)); 
+				lowestPoint = i->second.getTransform().transformPoint(i->second.getPoint(1)); 
+			}
 		}
 
-		int_fast32_t redAvg{ redAvg = red / pixelCount };
-		int_fast32_t greenAvg{ greenAvg = green / pixelCount };
-		int_fast32_t blueAvg{ blueAvg = blue / pixelCount };
+		else if (i->second.getPoint(1).y < i->second.getPoint(0).y &&
+			i->second.getPoint(1).y < i->second.getPoint(2).y)
+		{
+			highestPoint = i->second.getTransform().transformPoint(i->second.getPoint(1)); 
 
-		i->second.setFillColor(sf::Color(redAvg, greenAvg, blueAvg, 255)); 
+			if (i->second.getPoint(0).y < i->second.getPoint(2).y)
+			{
+				middlePoint = i->second.getTransform().transformPoint(i->second.getPoint(0)); 
+				lowestPoint = i->second.getTransform().transformPoint(i->second.getPoint(2)); 
+			}
+
+			else
+			{
+				middlePoint = i->second.getTransform().transformPoint(i->second.getPoint(2)); 
+				lowestPoint = i->second.getTransform().transformPoint(i->second.getPoint(0)); 
+			}
+		}
+
+		else
+		{
+			highestPoint = i->second.getTransform().transformPoint(i->second.getPoint(2)); 
+
+			if (i->second.getPoint(0).y < i->second.getPoint(1).y)
+			{
+				middlePoint = i->second.getTransform().transformPoint(i->second.getPoint(0)); 
+				lowestPoint = i->second.getTransform().transformPoint(i->second.getPoint(1)); 
+			}
+
+			else
+			{
+				middlePoint = i->second.getTransform().transformPoint(i->second.getPoint(1)); 
+				lowestPoint = i->second.getTransform().transformPoint(i->second.getPoint(0)); 
+			}
+		}
+			/*
+			y1=a*x1+b
+			b=y1-a*x1 
+
+			y2=a*x2+b
+			b=y2-a*x2 
+
+			y1-x1*a=y2-x2*a 
+
+			a=(y2-y1)/(x2-x1) 
+
+			b=y1-x1*((y2-y1)/(x2-x1)) 
+
+			x=((x2-x1)*y+x1*y2-y1*x2)/(y2-y1) 
+
+			y = pixel.y 
+			x1 = lowestPoint.x		y1 = lowestPoint.y 
+			x2 = highestPoint.x		y2 = highestPoint.y 
+			*/
+
+		//MiddlePoint is on right side. -> long line is left -> iterate left to right 
+
+		pixel.y = lowestPoint.y;
+
+		if (middlePoint.x > highestPoint.x)
+		{
+
+			while (pixel.y >= highestPoint.y)
+			{
+				pixel.x = ((highestPoint.x - lowestPoint.x) * pixel.y + lowestPoint.x * highestPoint.y - lowestPoint.y
+					*highestPoint.x) / (highestPoint.y - lowestPoint.y); 
+
+				//We don't want decimal pixels =/ 
+				int_fast32_t rounder = static_cast <int_fast32_t>(pixel.x);
+				if (pixel.x - 0.5 > rounder)
+					pixel.x = rounder + 1;
+				else
+					pixel.x = rounder;
+
+				if (pixel.y >= middlePoint.y) 
+				{
+					maxX = ((middlePoint.x - lowestPoint.x) * pixel.y + lowestPoint.x * middlePoint.y - lowestPoint.y
+						*middlePoint.x) / (middlePoint.y - lowestPoint.y); 
+
+					rounder = static_cast <int_fast32_t>(maxX); 
+					if (maxX - 0.5 > rounder)
+						maxX = rounder + 1; 
+					else
+						maxX = rounder; 
+				}
+
+				else 
+				{
+					maxX = ((middlePoint.x - highestPoint.x) * pixel.y + highestPoint.x * middlePoint.y - highestPoint.y
+						*middlePoint.x) / (middlePoint.y - highestPoint.y); 
+
+					rounder = static_cast <int_fast32_t>(maxX);
+					if (maxX - 0.5 > rounder)
+						maxX = rounder + 1;
+					else
+						maxX = rounder; 
+				}
+
+				while (pixel.x <= maxX) 
+				{
+					red += originalPic.getPixel(pixel.x - 1, pixel.y).r;
+					green += originalPic.getPixel(pixel.x - 1, pixel.y).g;
+					blue += originalPic.getPixel(pixel.x - 1, pixel.y).b;
+					++pixelCount;
+
+					++pixel.x;
+				}
+
+				--pixel.y;
+			}
+		}
+		
+		else 
+		{
+
+			while (pixel.y >= highestPoint.y)
+			{
+				pixel.x = ((highestPoint.x - lowestPoint.x) * pixel.y + lowestPoint.x * highestPoint.y - lowestPoint.y
+					*highestPoint.x) / (highestPoint.y - lowestPoint.y); 
+
+				int_fast32_t rounder = static_cast <int_fast32_t>(pixel.x);
+				if (pixel.x - 0.5 > rounder)
+					pixel.x = rounder + 1;
+				else
+					pixel.x = rounder;
+
+				if (pixel.y >= middlePoint.y)
+				{
+					minX = ((middlePoint.x - lowestPoint.x) * pixel.y + lowestPoint.x * middlePoint.y - lowestPoint.y
+						*middlePoint.x) / (middlePoint.y - lowestPoint.y); 
+
+					rounder = static_cast <int_fast32_t>(minX);
+					if (minX - 0.5 > rounder)
+						minX = rounder + 1;
+					else
+						minX = rounder;
+				}
+
+				else
+				{
+					minX = ((middlePoint.x - highestPoint.x) * pixel.y + highestPoint.x * middlePoint.y - highestPoint.y
+						*middlePoint.x) / (middlePoint.y - highestPoint.y); 
+
+					rounder = static_cast <int_fast32_t>(minX);
+					if (minX - 0.5 > rounder)
+						minX = rounder + 1;
+					else
+						minX = rounder;
+				}
+
+				while (pixel.x >= minX)
+				{
+					/*red += originalPic.getPixel(pixel.x - 1, pixel.y).r;
+					green += originalPic.getPixel(pixel.x - 1, pixel.y).g;
+					blue += originalPic.getPixel(pixel.x - 1, pixel.y).b;*/ 
+					red += originalPic.getPixel(pixel.x, pixel.y).r;
+					green += originalPic.getPixel(pixel.x, pixel.y).g;
+					blue += originalPic.getPixel(pixel.x, pixel.y).b;
+
+					++pixelCount;
+
+					--pixel.x;
+				}
+
+				--pixel.y;
+			}
+		}
+
+		//No division if any thingys are 0 
+		if (pixelCount)
+		{
+			int_fast32_t redAvg{ 0 };
+			int_fast32_t greenAvg{ 0 };
+			int_fast32_t blueAvg{ 0 };
+
+			redAvg = red / pixelCount;
+			greenAvg = green / pixelCount;
+			blueAvg = blue / pixelCount;
+
+			i->second.setFillColor(sf::Color(redAvg, greenAvg, blueAvg, 255));
+		}
 		i->second.setOutlineThickness(0); 
 
 		i->second.scale(oldScale, oldScale); 
