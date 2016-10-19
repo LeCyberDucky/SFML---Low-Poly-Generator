@@ -6,6 +6,7 @@
 #include <cstdint> 
 #include <numeric> 
 #include <SFML/Graphics.hpp> 
+#include <string> 
 #include <vector> 
 
 void getTriangle(sf::ConvexShape& tempTriangle, int_fast32_t pointNum, sf::Vector2f mousePos, sf::RenderWindow& window, int_fast32_t imageSizeX, int_fast32_t imageSizeY)
@@ -64,6 +65,7 @@ bool collisionCheck(const sf::ConvexShape& triangle, sf::Vector2f checkPoint)
 	return (alpha > 0 && beta > 0 && gamma > 0);
 }
 
+//If any point of the newest triangle is close to the point of another triangle, set the point of the new triangle to the existing one
 void setClosePoints(const std::vector<std::pair<int_fast32_t, sf::ConvexShape>>& triangles, sf::ConvexShape& triangle)
 {
 	 for (int_fast32_t pointNum{ 0 }; pointNum != 3; ++pointNum)
@@ -80,8 +82,7 @@ void setClosePoints(const std::vector<std::pair<int_fast32_t, sf::ConvexShape>>&
 					if (((triNum->second.getTransform().transformPoint(triNum->second.getPoint(triPoNum)).y - 20) <= triangle.getPoint(pointNum).y) &&
 						(triangle.getPoint(pointNum).y <= (triNum->second.getTransform().transformPoint(triNum->second.getPoint(triPoNum)).y + 20)))
 						{
-							tempPoint.x = triNum->second.getTransform().transformPoint(triNum->second.getPoint(triPoNum)).x;
-							tempPoint.y = triNum->second.getTransform().transformPoint(triNum->second.getPoint(triPoNum)).y;
+							tempPoint = triNum->second.getTransform().transformPoint(triNum->second.getPoint(triPoNum)); 
 						}
 
 				triangle.setPoint(pointNum, tempPoint);
@@ -111,41 +112,15 @@ void setAvrgColour(std::vector<std::pair<int_fast32_t, sf::ConvexShape>>& triang
 		int_fast64_t blue{ 0 }; 
 		int_fast64_t pixelCount{ 0 }; 
 
-		/*int_fast32_t maxX = static_cast <int_fast32_t>( (i->second.getGlobalBounds().left + i->second.getGlobalBounds().width) );
-		int_fast32_t minX = static_cast <int_fast32_t>(i->second.getGlobalBounds().left);
-
-		int_fast32_t maxY = static_cast <int_fast32_t>( (i->second.getGlobalBounds().top + i->second.getGlobalBounds().height) );
-		int_fast32_t minY = static_cast <int_fast32_t>( i->second.getGlobalBounds().top );
-		*/ 
-
 		double maxX{ 0 }; 
 		double minX{ 0 }; 
 		double maxY{ 0 }; 
 		double minY{ 0 }; 
 
-		pixel.x = minX; 
-		pixel.y = maxY; 
-
-		/*while (pixel.y >= minY)
-		{
-			while (pixel.x <= maxX)
-			{
-				if (collisionCheck(i->second, pixel))
-				{
-					//Pixels minus 1, because they are stored in a vector (so counting starts at 0 instead of 1. Otherwise, we'd get out of range.)
-					red += originalPic.getPixel(pixel.x - 1, pixel.y).r;
-					green += originalPic.getPixel(pixel.x - 1, pixel.y).g;
-					blue += originalPic.getPixel(pixel.x - 1, pixel.y).b;
-					++pixelCount; 
-				}
-				++pixel.x;
-			}
-
-			pixel.x = minX;
-			--pixel.y;
-		}*/
-
-		//Experimental code to speed up process of iterating trough pixels
+		/*Experimental code to speed up process of iterating trough pixels 
+		 *Seems to be working and to be way faster than the old aproach (yay) where 
+		 *we'd iterate trough every pixel of the global bounds rectangel of the triangel 
+		 *and check if that pixel is inside the triangle using collisionCheck*/
 
 		sf::Vector2f highestPoint; 
 		sf::Vector2f lowestPoint; 
@@ -203,37 +178,17 @@ void setAvrgColour(std::vector<std::pair<int_fast32_t, sf::ConvexShape>>& triang
 				lowestPoint = i->second.getTransform().transformPoint(i->second.getPoint(0)); 
 			}
 		}
-			/*
-			y1=a*x1+b
-			b=y1-a*x1 
-
-			y2=a*x2+b
-			b=y2-a*x2 
-
-			y1-x1*a=y2-x2*a 
-
-			a=(y2-y1)/(x2-x1) 
-
-			b=y1-x1*((y2-y1)/(x2-x1)) 
-
-			x=((x2-x1)*y+x1*y2-y1*x2)/(y2-y1) 
-
-			y = pixel.y 
-			x1 = lowestPoint.x		y1 = lowestPoint.y 
-			x2 = highestPoint.x		y2 = highestPoint.y 
-			*/
-
-		//MiddlePoint is on right side. -> long line is left -> iterate left to right 
 
 		pixel.y = lowestPoint.y;
 
-		if (middlePoint.x > highestPoint.x)
+		//MiddlePoint is on right side. -> long line is left -> iterate left to right 
+		//if (middlePoint.x > highestPoint.x) 
+		if (middlePoint.x > getX(middlePoint.y, lowestPoint, highestPoint)) 
 		{
 
-			while (pixel.y >= highestPoint.y)
+			while (pixel.y > highestPoint.y)
 			{
-				pixel.x = ((highestPoint.x - lowestPoint.x) * pixel.y + lowestPoint.x * highestPoint.y - lowestPoint.y
-					*highestPoint.x) / (highestPoint.y - lowestPoint.y); 
+				pixel.x = getX(pixel.y, lowestPoint, highestPoint); 
 
 				//We don't want decimal pixels =/ 
 				int_fast32_t rounder = static_cast <int_fast32_t>(pixel.x);
@@ -242,10 +197,9 @@ void setAvrgColour(std::vector<std::pair<int_fast32_t, sf::ConvexShape>>& triang
 				else
 					pixel.x = rounder;
 
-				if (pixel.y >= middlePoint.y) 
+				if (pixel.y > middlePoint.y) 
 				{
-					maxX = ((middlePoint.x - lowestPoint.x) * pixel.y + lowestPoint.x * middlePoint.y - lowestPoint.y
-						*middlePoint.x) / (middlePoint.y - lowestPoint.y); 
+					maxX = getX(pixel.y, lowestPoint, middlePoint); 
 
 					rounder = static_cast <int_fast32_t>(maxX); 
 					if (maxX - 0.5 > rounder)
@@ -256,8 +210,7 @@ void setAvrgColour(std::vector<std::pair<int_fast32_t, sf::ConvexShape>>& triang
 
 				else 
 				{
-					maxX = ((middlePoint.x - highestPoint.x) * pixel.y + highestPoint.x * middlePoint.y - highestPoint.y
-						*middlePoint.x) / (middlePoint.y - highestPoint.y); 
+					maxX = getX(pixel.y, middlePoint, highestPoint); 
 
 					rounder = static_cast <int_fast32_t>(maxX);
 					if (maxX - 0.5 > rounder)
@@ -268,9 +221,9 @@ void setAvrgColour(std::vector<std::pair<int_fast32_t, sf::ConvexShape>>& triang
 
 				while (pixel.x <= maxX) 
 				{
-					red += originalPic.getPixel(pixel.x - 1, pixel.y).r;
-					green += originalPic.getPixel(pixel.x - 1, pixel.y).g;
-					blue += originalPic.getPixel(pixel.x - 1, pixel.y).b;
+					red += originalPic.getPixel(pixel.x - 1, pixel.y - 1).r;
+					green += originalPic.getPixel(pixel.x - 1, pixel.y - 1).g;
+					blue += originalPic.getPixel(pixel.x - 1, pixel.y - 1).b;
 					++pixelCount;
 
 					++pixel.x;
@@ -282,61 +235,54 @@ void setAvrgColour(std::vector<std::pair<int_fast32_t, sf::ConvexShape>>& triang
 		
 		else 
 		{
-
-			while (pixel.y >= highestPoint.y)
+			while (pixel.y > highestPoint.y)
 			{
-				pixel.x = ((highestPoint.x - lowestPoint.x) * pixel.y + lowestPoint.x * highestPoint.y - lowestPoint.y
-					*highestPoint.x) / (highestPoint.y - lowestPoint.y); 
+				/*pixel.x = getX(pixel.y, lowestPoint, highestPoint); 
 
 				int_fast32_t rounder = static_cast <int_fast32_t>(pixel.x);
 				if (pixel.x - 0.5 > rounder)
 					pixel.x = rounder + 1;
 				else
-					pixel.x = rounder;
+					pixel.x = rounder; */ 
 
-				if (pixel.y >= middlePoint.y)
-				{
-					minX = ((middlePoint.x - lowestPoint.x) * pixel.y + lowestPoint.x * middlePoint.y - lowestPoint.y
-						*middlePoint.x) / (middlePoint.y - lowestPoint.y); 
+				maxX = getX(pixel.y, lowestPoint, highestPoint); 
 
-					rounder = static_cast <int_fast32_t>(minX);
-					if (minX - 0.5 > rounder)
-						minX = rounder + 1;
-					else
-						minX = rounder;
-				}
+				/*if (pixel.y > middlePoint.y) 
+					minX = getX(pixel.y, lowestPoint, middlePoint); 
 
 				else
 				{
-					minX = ((middlePoint.x - highestPoint.x) * pixel.y + highestPoint.x * middlePoint.y - highestPoint.y
-						*middlePoint.x) / (middlePoint.y - highestPoint.y); 
+					minX = getX(pixel.y, middlePoint, highestPoint); 
 
 					rounder = static_cast <int_fast32_t>(minX);
 					if (minX - 0.5 > rounder)
 						minX = rounder + 1;
 					else
 						minX = rounder;
-				}
+				}*/ 
 
-				while (pixel.x >= minX)
+				if (pixel.y > middlePoint.y)
+					pixel.x = getX(pixel.y, lowestPoint, middlePoint);
+
+				else
+					pixel.x = getX(pixel.y, middlePoint, highestPoint); 
+
+				while (pixel.x <= maxX)
 				{
-					/*red += originalPic.getPixel(pixel.x - 1, pixel.y).r;
-					green += originalPic.getPixel(pixel.x - 1, pixel.y).g;
-					blue += originalPic.getPixel(pixel.x - 1, pixel.y).b;*/ 
 					red += originalPic.getPixel(pixel.x, pixel.y).r;
 					green += originalPic.getPixel(pixel.x, pixel.y).g;
 					blue += originalPic.getPixel(pixel.x, pixel.y).b;
 
 					++pixelCount;
 
-					--pixel.x;
+					++pixel.x; 
 				}
 
 				--pixel.y;
 			}
 		}
 
-		//No division if any thingys are 0 
+		//No division if the pixelCount is 0 
 		if (pixelCount)
 		{
 			int_fast32_t redAvg{ 0 };
@@ -357,7 +303,7 @@ void setAvrgColour(std::vector<std::pair<int_fast32_t, sf::ConvexShape>>& triang
 	workPic.setScale(oldScale, oldScale); 
 }
 
-//"Draw the generated triangles onto the original picture" and save this as an image on the harddrive 
+//"Draw the generated triangles onto the original picture" and save this as an image to the harddrive 
 void savePicture(std::vector<std::pair<int_fast32_t, sf::ConvexShape>>& triangles, const sf::Image& originalPic, sf::Sprite& workPic, double oldScale, const std::string saveLocation)
 {
 	sf::RenderTexture savePic;
@@ -374,11 +320,59 @@ void savePicture(std::vector<std::pair<int_fast32_t, sf::ConvexShape>>& triangle
 		savePic.draw(i->second); 
 		i->second.scale(oldScale, oldScale);  
 	}
+	
+	savePic.display(); 
 
-	savePic.display();
+	savePic.getTexture().copyToImage().saveToFile(saveLocation); 
+}
 
-	sf::Image saveImage; 
-	saveImage = savePic.getTexture().copyToImage(); 
+//Returns true, if forming a triangle is possible with the given points
+bool pointsFormTriangle(sf::ConvexShape triangle)
+{
+	bool twoPointsSame{ triangle.getPoint(0) == triangle.getPoint(1) ||
+		triangle.getPoint(0) == triangle.getPoint(2) ||
+		triangle.getPoint(1) == triangle.getPoint(2) };
 
-	saveImage.saveToFile(saveLocation); 
+	bool straightLine{ ((triangle.getTransform().transformPoint(triangle.getPoint(0)).x ==
+		triangle.getTransform().transformPoint(triangle.getPoint(1)).x)
+		&&
+		(triangle.getTransform().transformPoint(triangle.getPoint(1)).x ==
+			triangle.getTransform().transformPoint(triangle.getPoint(2)).x))
+		||
+		((triangle.getTransform().transformPoint(triangle.getPoint(0)).y ==
+			triangle.getTransform().transformPoint(triangle.getPoint(1)).y)
+			&&
+			(triangle.getTransform().transformPoint(triangle.getPoint(1)).y ==
+				triangle.getTransform().transformPoint(triangle.getPoint(2)).y)) }; 
+
+	return !(twoPointsSame || straightLine); 
+}
+
+
+//Returns the corresponding x-value given the y-value and two points that form a line
+double getX(double y, sf::Vector2f p1, sf::Vector2f p2) 
+{
+	/*
+	y1=a*x1+b
+	b=y1-a*x1
+
+	y2=a*x2+b
+	b=y2-a*x2
+
+	y1-x1*a=y2-x2*a
+
+	a=(y2-y1)/(x2-x1)
+
+	b=y1-x1*((y2-y1)/(x2-x1))
+
+	y=a*x+b 
+
+	x=((x2-x1)*y+x1*y2-y1*x2)/(y2-y1)
+
+	y = pixel.y
+	x1 = lowestPoint.x		y1 = lowestPoint.y
+	x2 = highestPoint.x		y2 = h
+	*/
+
+	return ((p2.x - p1.x) * y + p1.x * p2.y - p1.y * p2.x) / (p2.y - p1.y); 
 }

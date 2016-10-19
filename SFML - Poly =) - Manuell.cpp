@@ -1,14 +1,13 @@
 // SFML - Poly test =).cpp : Definiert den Einstiegspunkt für die Anwendung.
-//
 
 #include "stdafx.h" //#include <SFML/Graphics.hpp> included to solve problems with rect.contains and min/max
-#include <SFML/Graphics.hpp> 
+#include <SFML/Graphics.hpp> //Using SFML 2.3.2 
 
 #include "GenerateTriangles.h" 
 
 #include <algorithm> 
 #include <cstdint> 
-#include <fstream> 
+#include <fstream>
 #include <string> 
 #include <vector> 
 
@@ -22,28 +21,11 @@ int_fast32_t main()
 	ifstream inFile; 
 	inFile.open("Pic Location.txt"); 
 
-	string openLocation; 
-	string saveLocation; 
-	string iconLocation; 
-	string tempString; 
-	int_fast16_t lineCount{ 0 };
+	string openLocation, saveLocation, iconLocation; 
 
-	while (std::getline(inFile, tempString)) 
-	{
-		if (lineCount == 0)
-		{
-			openLocation = tempString;
-			++lineCount;
-		}
-
-		else if (lineCount == 1) 
-		{
-			saveLocation = tempString;
-			++lineCount; 
-		}
-		else
-			iconLocation = tempString; 
-	}
+	std::getline(inFile, openLocation); 
+	std::getline(inFile, saveLocation); 
+	std::getline(inFile, iconLocation); 
 
 	sf::Image icon; 
 
@@ -100,7 +82,6 @@ int_fast32_t main()
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
-
 			switch (event.type)
 			{
 
@@ -139,24 +120,7 @@ int_fast32_t main()
 							setClosePoints(triangles, tempTriangle); 
 
 							//Don't emplace_back if two points are same or all points build straight line ( = no triangle) 
-							bool twoPointsSame{ tempTriangle.getPoint(0) == tempTriangle.getPoint(1) ||
-												tempTriangle.getPoint(0) == tempTriangle.getPoint(2) ||
-												tempTriangle.getPoint(1) == tempTriangle.getPoint(2) }; 
-
-							bool straightLine{(( tempTriangle.getTransform().transformPoint(tempTriangle.getPoint(0)).x ==
-											     tempTriangle.getTransform().transformPoint(tempTriangle.getPoint(1)).x ) 
-												&&
-												(tempTriangle.getTransform().transformPoint(tempTriangle.getPoint(1)).x ==
-											     tempTriangle.getTransform().transformPoint(tempTriangle.getPoint(2)).x)) 
-												|| 
-											  (( tempTriangle.getTransform().transformPoint(tempTriangle.getPoint(0)).y ==
-											     tempTriangle.getTransform().transformPoint(tempTriangle.getPoint(1)).y ) 
-												&&
-												(tempTriangle.getTransform().transformPoint(tempTriangle.getPoint(1)).y ==
-											    tempTriangle.getTransform().transformPoint(tempTriangle.getPoint(2)).y)) };
-
-
-							if (!twoPointsSame && !straightLine) 
+							if (pointsFormTriangle(tempTriangle)) 
 								triangles.emplace_back(0, tempTriangle);
 						}
 					}
