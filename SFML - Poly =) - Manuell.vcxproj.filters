@@ -24,10 +24,10 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RandPoint.h">
+    <ClInclude Include="GenerateTriangles.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GenerateTriangles.h">
+    <ClInclude Include="Manipulation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -35,13 +35,13 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RandPoint.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GenerateTriangles.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SFML - Poly =) - Manuell.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Manipulation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

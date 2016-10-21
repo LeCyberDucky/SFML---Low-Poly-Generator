@@ -146,13 +146,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GenerateTriangles.h" />
-    <ClInclude Include="RandPoint.h" />
+    <ClInclude Include="Manipulation.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GenerateTriangles.cpp" />
-    <ClCompile Include="RandPoint.cpp" />
+    <ClCompile Include="Manipulation.cpp" />
     <ClCompile Include="SFML - Poly =) - Manuell.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

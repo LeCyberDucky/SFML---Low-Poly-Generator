@@ -4,6 +4,7 @@
 #include <SFML/Graphics.hpp> //Using SFML 2.3.2 
 
 #include "GenerateTriangles.h" 
+#include "Manipulation.h" 
 
 #include <algorithm> 
 #include <cstdint> 
@@ -118,6 +119,8 @@ int_fast32_t main()
 						if (clicks % 3 == 0)
 						{
 							setClosePoints(triangles, tempTriangle); 
+
+							pointClockSort(tempTriangle); 
 
 							//Don't emplace_back if two points are same or all points build straight line ( = no triangle) 
 							if (pointsFormTriangle(tempTriangle)) 
