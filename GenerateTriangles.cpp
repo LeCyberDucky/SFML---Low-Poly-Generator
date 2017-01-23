@@ -9,7 +9,7 @@
 #include <string> 
 #include <vector> 
 
-void getTriangle(sf::ConvexShape& tempTriangle, int_fast32_t pointNum, sf::Vector2f mousePos, sf::RenderWindow& window, int_fast32_t imgX, int_fast32_t imgY)
+void getTriangle(sf::ConvexShape &tempTriangle, int_fast32_t pointNum, sf::Vector2f mousePos, sf::RenderWindow &window, int_fast32_t imgX, int_fast32_t imgY)
 {
 	using sf::Vector2f; 
 
@@ -38,7 +38,7 @@ void getTriangle(sf::ConvexShape& tempTriangle, int_fast32_t pointNum, sf::Vecto
 /*Check if point is within a triangle using barycentric coordinates 
  *http://stackoverflow.com/questions/13300904/determine-whether-point-lies-inside-triangle 
  */
-bool collisionCheck(const sf::ConvexShape& triangle, sf::Vector2f checkPoint)
+bool collisionCheck(const sf::ConvexShape &triangle, sf::Vector2f checkPoint)
 {
 	double cpX{ checkPoint.x };
 	double cpY{ checkPoint.y };
@@ -68,7 +68,9 @@ bool collisionCheck(const sf::ConvexShape& triangle, sf::Vector2f checkPoint)
 }
 
 //If any point of the newest triangle is close to the point of another triangle, set the point of the new triangle to the existing one
-void setClosePoints(const std::vector<std::pair<int_fast32_t, sf::ConvexShape>>& triangles, sf::ConvexShape& triangle)
+//TODO: Return a bool to indicate wether points were changed or not. Meh, not quiet right. We want to prioritize corner points over 
+//edges. We can check for edges first (and change the point if edge was found), and run a check for corner points with the mouse position
+void setClosePoints(const std::vector<std::pair<int_fast32_t, sf::ConvexShape>> &triangles, sf::ConvexShape &triangle)
 {
 	 for (int_fast32_t pointNum{ 0 }; pointNum != 3; ++pointNum)
 	{
@@ -145,7 +147,7 @@ double getX(double y, sf::Vector2f p1, sf::Vector2f p2)
 
 /*Sorts the points of a triangle in clockwise order. The points need to be in 
 either clockwise or counter-clockwise order. Otherwise the drawing gets messed up*/
-void pointClockSort(sf::ConvexShape& triangle) 
+void pointClockSort(sf::ConvexShape &triangle) 
 {
 	using std::vector; 
 

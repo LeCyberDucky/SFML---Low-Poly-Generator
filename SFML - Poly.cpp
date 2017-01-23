@@ -32,6 +32,7 @@ int_fast32_t main()
 
 	if(!icon.loadFromFile(iconLocation)) 
 	{
+		//TODO: ErrorWindow
 		return 1;
 	}
 
@@ -51,20 +52,23 @@ int_fast32_t main()
 
 	if (!originalPic.loadFromFile(openLocation))
 	{
+		//TODO: ErrorWindow
 		return 1; 
 	}
 
 	if (!background.loadFromImage(originalPic))
 	{
+		//TODO: ErrorWindow
 		return 1; 
 	}
 
 	double startingScale;
 
+	//TODO: Don't Hardcode size. Find screen resolution http://www.sfml-dev.org/documentation/2.4.1/classsf_1_1VideoMode.php
 	if (originalPic.getSize().x > originalPic.getSize().y)
 		startingScale = 800.0 / originalPic.getSize().x;
 
-	else if (originalPic.getSize().x < originalPic.getSize().y)
+	else
 		startingScale = 450.0 / originalPic.getSize().y; 
 
 	sf::Sprite workPic; 

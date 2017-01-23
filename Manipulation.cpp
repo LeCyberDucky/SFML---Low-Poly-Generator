@@ -1,10 +1,13 @@
 #include "stdafx.h" 
 
+#include <fstream> 
+#include <string>
+
+#include "GenerateTriangles.h" 
 #include "Manipulation.h" 
-#include "GenerateTriangles.h"
 
 //"Draw the generated triangles onto the original picture" and save this as an image to the harddrive 
-void savePicture(std::vector<std::pair<int_fast32_t, sf::ConvexShape>>& triangles, const sf::Image& originalPic, sf::Sprite& workPic, double oldScale, const std::string saveLocation)
+void savePicture(std::vector<std::pair<int_fast32_t, sf::ConvexShape>> &triangles, const sf::Image &originalPic, sf::Sprite &workPic, double oldScale, const std::string saveLocation)
 {
 	sf::RenderTexture savePic;
 	if (!savePic.create(originalPic.getSize().x, originalPic.getSize().y)) { /*Do stuff*/ }
@@ -27,7 +30,7 @@ void savePicture(std::vector<std::pair<int_fast32_t, sf::ConvexShape>>& triangle
 }
 
 //Iterate trough the pixels of each triangle. For each triangle, set it's average colour as fillcolour 
-void setAvrgColour(std::vector<std::pair<int_fast32_t, sf::ConvexShape>>& triangles, sf::Sprite& workPic, const sf::Image& originalPic, double oldScale)
+void setAvrgColour(std::vector<std::pair<int_fast32_t, sf::ConvexShape>> &triangles, sf::Sprite &workPic, const sf::Image &originalPic, double oldScale)
 {
 	sf::Vector2f pixel;
 

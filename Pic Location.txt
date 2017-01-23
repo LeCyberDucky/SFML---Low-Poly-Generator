@@ -1,3 +1,3 @@
-C:\Users\Andy\OneDrive\Dokumenter\Andy hjemme\Mine Dokumenter\C++\Low Poly Test\23755.jpg 
+C:\Users\Andy\OneDrive\Dokumenter\Andy hjemme\C++\Low Poly Test\23755.jpg 
 C:\Users\Andy\Desktop\Wat3.png
-C:\Users\Andy\OneDrive\Dokumenter\Andy hjemme\Mine Dokumenter\C++\Low Poly Test\SFML-Logo.png
+C:\Users\Andy\OneDrive\Dokumenter\Andy hjemme\C++\Low Poly Test\SFML-Logo.png

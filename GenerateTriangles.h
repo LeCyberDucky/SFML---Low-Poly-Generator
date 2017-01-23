@@ -3,17 +3,24 @@
 
 #include <SFML/Graphics.hpp> 
 
-void getTriangle(sf::ConvexShape& tempTriangle, int_fast32_t pointNum, sf::Vector2f mousePos, sf::RenderWindow& window, int_fast32_t imgX, int_fast32_t imgY);
+struct Triangle 
+{
+	sf::ConvexShape shape; 
+	sf::Color fillColor; 
+	bool colorUpToDate{ 0 };
+};
 
-bool collisionCheck(const sf::ConvexShape& triangle, sf::Vector2f mousePos); 
+void getTriangle(sf::ConvexShape &tempTriangle, int_fast32_t pointNum, sf::Vector2f mousePos, sf::RenderWindow &window, int_fast32_t imgX, int_fast32_t imgY);
 
-void setClosePoints(const std::vector<std::pair<int_fast32_t, sf::ConvexShape>>& triangles, sf::ConvexShape& triangle); 
+bool collisionCheck(const sf::ConvexShape &triangle, sf::Vector2f mousePos); 
+
+void setClosePoints(const std::vector<std::pair<int_fast32_t, sf::ConvexShape>> &triangles, sf::ConvexShape &triangle); 
 
 bool pointsFormTriangle(sf::ConvexShape triangle); 
 
 double getX(double y, sf::Vector2f p1, sf::Vector2f p2); 
 
-void pointClockSort(sf::ConvexShape& triangle); 
+void pointClockSort(sf::ConvexShape &triangle); 
 
 bool clockwiseSort(sf::Vector2f p1, sf::Vector2f p2, sf::Vector2f center); 
 
